@@ -29,6 +29,7 @@ public class GamePlayMgr : MonoBehaviour
     public Action<UISoltItem,int, int> OnActItemSelected;
 
     public Action<MoveDir,Vector2, Vector2> OnActPaintMove;
+    public Action<Vector2> OnActPaintImmediately;
     public Action<Vector2> OnActPaintRestore;
     public Action OnActSoltItemRestEnd;
     public Action OnActSoltItemRest;
@@ -171,11 +172,17 @@ public class GamePlayMgr : MonoBehaviour
             return;
         }
 
-        if (m_SlectItems.Count <= CurtAnstwers.Count)
-        {
+        //if (m_SlectItems.Count <= CurtAnstwers.Count)
+        //{
             int startIndex = 0;
             for (int i = 0; i < m_SlectItems.Count; i++)
             {
+                //超出正确答案
+                if ( i >= CurtAnstwers.Count)
+                {
+                    startIndex = i;
+                    break;
+                }
                 if (!CurtAnstwers[i].Equals(m_SlectItems[i].Index.ToString()))
                 {
                     startIndex = i;
@@ -189,7 +196,7 @@ public class GamePlayMgr : MonoBehaviour
                 m_SlectItems[i].TipsWrongAnswer();
             }
             m_tips_count++;
-        }
+        //}
     }
 
     public void LoadAudioFromWeb(string path)
@@ -340,9 +347,41 @@ public class GamePlayMgr : MonoBehaviour
             if(m_RightRestorItems != null)
             {
                 m_RightRestorItems.SelectToRowCol();
+                SendPaintImmediately(m_RightRestorItems, m_RightRestorItems.RowIndex, m_RightRestorItems.ColIndex);
                 m_RightRestorItems = null;
             }
             OnActSoltItemRestEnd?.Invoke();
         }
+    }
+
+    public void SendPaintImmediately(UISoltItem select, int row,int col)
+    {
+        //发送
+        if (m_SlectItems.Contains(select))
+            return;
+        if (m_SlectItems.Count > 0)
+        {
+            UISoltItem items = m_SlectItems[m_SlectItems.Count - 1];
+            if (items)
+            {
+                MoveDir dir = GetMoveDir(items.RowIndex, items.ColIndex, row, col);
+
+                OnActPaintMove?.Invoke(dir, items.RectTrans.position, select.RectTrans.position);
+
+                Vector3 pos1 = items.RectTrans.position + (select.RectTrans.position - items.RectTrans.position).normalized * 120;
+
+                OnActPaintImmediately?.Invoke(pos1);
+
+                OnActPaintImmediately?.Invoke(select.RectTrans.position);
+            }
+        }
+        else
+        {
+            OnActPaintImmediately?.Invoke(select.RectTrans.position + MoveOffset);
+        }
+
+        m_SlectItems.Add(select);
+
+        OnActItemSelected?.Invoke(select, row, col);
     }
 }

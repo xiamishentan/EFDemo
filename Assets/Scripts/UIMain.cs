@@ -63,6 +63,7 @@ public class UIMain : MonoBehaviour
         MaskableGraphic maskableGraphic = gameObject.AddComponent<MaskableGraphic>();
 
         GamePlayMgr.Instance.OnActPaintMove += OnPaintMove;
+        GamePlayMgr.Instance.OnActPaintImmediately += OnActPaintImmediately;
         GamePlayMgr.Instance.OnActPaintRestore += OnPaintResotre;
         GamePlayMgr.Instance.OnActSoltItemRest += OnActSoltItemRest;
     }
@@ -78,7 +79,9 @@ public class UIMain : MonoBehaviour
         if (GamePlayMgr.Instance)
         {
             GamePlayMgr.Instance.OnActPaintMove -= OnPaintMove;
+            GamePlayMgr.Instance.OnActPaintImmediately -= OnActPaintImmediately;
             GamePlayMgr.Instance.OnActPaintRestore -= OnPaintResotre;
+            GamePlayMgr.Instance.OnActSoltItemRest -= OnActSoltItemRest;
         }
     }
 
@@ -110,6 +113,11 @@ public class UIMain : MonoBehaviour
         m_curtPaintPos = start;
         m_curtPaintDir = (target - start).normalized;
         m_startPaint = true;
+    }
+
+    void OnActPaintImmediately(Vector2 target)
+    {
+        CheckPoint(0,target);
     }
 
     void OnPaintResotre(Vector2 target)
@@ -259,10 +267,7 @@ public class UIMain : MonoBehaviour
         return rps.ToArray();
     }
 
-    Vector2 lastPos;//最后一个点
-    Vector2 penultPos;//倒数第二个点
-    float radius = 12f;
-    float distance = 1f;
+
     public void MoveTarget(float alpha, Vector2 startPos,Vector2 Targetposition)
     {
         if (Vector2.Distance(Targetposition, startPos) > 1)

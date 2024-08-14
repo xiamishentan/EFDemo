@@ -155,8 +155,8 @@ public class UISoltItem : MonoBehaviour
     {
         if (RowIndex == 2 && ColIndex == 1)
         {
-            m_CanSelect = true;
-            OnItemClicked();
+            SelectToRowCol();
+            GamePlayMgr.Instance.SendPaintImmediately(this, RowIndex, ColIndex);
         }
     }
 
@@ -188,7 +188,9 @@ public class UISoltItem : MonoBehaviour
     public void SelectToRowCol()
     {
         m_CanSelect = true;
-        OnItemClicked();
+        Select.gameObject.SetActive(true);
+        Normal.gameObject.SetActive(false);
+        m_Select = true;
     }
 
     void UpdateDissolve(float value)
